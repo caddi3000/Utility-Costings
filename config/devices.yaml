@@ -1,0 +1,24 @@
+# ONE place to manage tracked devices.
+# Add/remove/edit devices here, then run: python3 tools/generate.py
+# source may be a W or kW power sensor. unit must be W or kW.
+devices:
+  - id: ev_charger
+    name: EV Charger
+    icon: mdi:ev-station
+    source: sensor.evcc_delta_ac_max_smart_occp_charge_power
+    unit: W
+  - id: kitchen_plug
+    name: Kitchen Plug
+    icon: mdi:power-plug
+    source: sensor.kitchen_multi_power
+    unit: W
+  - id: kettle
+    name: Kettle
+    icon: mdi:kettle
+    source: sensor.kitchen_zigbee_power
+    unit: W
+  - id: fridge_freezer
+    name: Fridge / Chest Freezer
+    icon: mdi:fridge
+    source: sensor.chest_freezer_plug_power
+    unit: W

@@ -1,0 +1,4 @@
+grid_import_power: sensor.solarnet_power_grid_import
+grid_export_power: sensor.solarnet_power_grid_export
+house_power: sensor.house_power
+solar_power: sensor.total_solar_power
