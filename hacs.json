@@ -1,5 +1,5 @@
 {
-  "name": "Utility Cost Card",
-  "filename": "utility-cost-card.js",
-  "render_readme": true
+  "name": "Utility Cost",
+  "render_readme": true,
+  "homeassistant": "2025.1.0"
 }
