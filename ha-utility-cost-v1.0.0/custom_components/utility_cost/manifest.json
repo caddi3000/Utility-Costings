@@ -1,0 +1,14 @@
+{
+  "domain": "utility_cost",
+  "name": "Utility Cost",
+  "version": "1.0.0",
+  "config_flow": true,
+  "single_config_entry": true,
+  "documentation": "https://github.com/YOUR_GITHUB_USERNAME/ha-utility-cost",
+  "issue_tracker": "https://github.com/YOUR_GITHUB_USERNAME/ha-utility-cost/issues",
+  "codeowners": [],
+  "dependencies": ["http", "lovelace"],
+  "iot_class": "local_push",
+  "integration_type": "helper",
+  "requirements": []
+}
