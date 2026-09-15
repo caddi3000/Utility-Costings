@@ -1,7 +1,2 @@
 type: custom:utility-cost-card
-title: Electricity Cost
-# Optional override: devices can also be supplied directly here.
-# devices:
-#   - name: Pool Pump
-#     icon: mdi:pump
-#     energy_entity: sensor.pool_pump_energy
+title: Utility Cost

@@ -1,6 +1,5 @@
 {
-  "name": "Utility Cost",
-  "content_in_root": false,
+  "name": "Utility Cost Card",
   "filename": "utility-cost-card.js",
   "render_readme": true
 }

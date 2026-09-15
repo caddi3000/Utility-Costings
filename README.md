@@ -1,60 +1,61 @@
-# Home Assistant Utility Cost — v0.5.0
+# Utility Cost Card
 
-A Home Assistant package + Lovelace card for time-of-use electricity cost accounting.
+Home Assistant electricity-cost dashboard with time-of-use accounting, solar FIT, supply charges, bill-cycle totals and per-device tracking.
 
-## What v0.5 adds
+## HACS installation
 
-- True **TOU dollar accumulation**: each tracked device is costed using the tariff active at the time it consumed energy.
-- **Today / Month / Bill cycle / Year** energy and dollar meters.
-- Whole-bill estimate: **grid import cost + daily supply charge − solar export credit**.
-- Tiered daily FIT: first configured kWh/day at Tier 1, remaining export at Tier 2.
-- Tracked and **Other / Untracked** load cost views.
-- Rate changes preserve historical accumulated dollars. Change the helpers and only future consumption uses the new rates.
-- Device list remains generated from one file: `config/devices.yaml`.
+This repository is structured as a HACS **Dashboard** (Lovelace/plugin) repository. The installable frontend file is `utility-cost-card.js` at the repository root.
 
-## Current defaults
+1. Put this repository on GitHub.
+2. In HACS, add the GitHub repository as a **Dashboard** custom repository.
+3. Install **Utility Cost Card**.
+4. HACS should register the frontend resource automatically. If your HACS version asks you to add it manually, use the HACS-provided `/hacsfiles/.../utility-cost-card.js` module path rather than `/local/`.
+5. Add the card:
 
-The supplied defaults are EnergyAustralia Solar Max: peak 0.581713 AUD/kWh, shoulder 0.210584, off-peak 0.348018, supply 1.260600 AUD/day, FIT 0.08 for the first 10 kWh/day then 0.03.
-
-## Install
-
-1. Copy `packages/utility_cost.yaml` to your HA `packages` directory and ensure packages are enabled in `configuration.yaml`.
-2. Copy both files in `www/` to `/config/www/`.
-3. Add `/local/utility-cost-devices.js` and `/local/utility-cost-card.js` as Lovelace JavaScript module resources, in that order.
-4. Restart Home Assistant.
-5. Add the card shown in `examples/lovelace.yaml`.
-
-## Changing electricity plan later
-
-Change these HA helpers; do **not** edit the card:
-
-- `input_text.utility_plan_name`
-- `input_number.utility_peak_rate`
-- `input_number.utility_shoulder_rate`
-- `input_number.utility_offpeak_rate`
-- `input_number.utility_supply_daily`
-- `input_number.utility_fit_tier1`
-- `input_number.utility_fit_tier2`
-- `input_number.utility_fit_threshold`
-
-The cost ledger integrates live cost flow, so accumulated historical costs stay at their old tariff and new usage is charged at the new tariff.
-
-## Bill cycle
-
-The generated bill meter currently resets at midnight on the same day-of-month as `bill_cycle_start`, every three months anchored to its month. With the supplied `2026-09-05` start this generates `0 0 5 3,6,9,12 *` (5 Mar/Jun/Sep/Dec). If your retailer changes the billing-cycle anchor, edit `config/tariff_defaults.yaml` and rerun `python3 tools/generate.py`.
-
-## Add/remove devices
-
-Edit only `config/devices.yaml`, then run:
-
-```bash
-python3 tools/generate.py
+```yaml
+type: custom:utility-cost-card
+title: Utility Cost
 ```
 
-The generator creates energy integrations, period meters, TOU cost integrations and the Lovelace device registry.
+## Backend (one-time Home Assistant setup)
 
-## Accuracy notes
+HACS Dashboard installation installs the frontend card only. The accounting backend is deliberately kept as a Home Assistant package in `packages/utility_cost.yaml`.
 
-The **net bill** is the retailer-style estimate and uses grid import, supply charge and FIT. Individual appliance costs are useful TOU-equivalent attribution. A device powered by self-consumed solar cannot be uniquely assigned a retailer grid cost without circuit/source-level energy-flow attribution.
+Copy `packages/utility_cost.yaml` to your HA `/config/packages/utility_cost.yaml` and ensure packages are enabled in `configuration.yaml`:
 
-FIT tier switching is based on the daily export meter. Around the exact tier threshold there can be a very small integration-step discrepancy depending on source update frequency.
+```yaml
+homeassistant:
+  packages: !include_dir_named packages
+```
+
+Restart Home Assistant after checking configuration.
+
+The backend contains the TOU accumulators, supply charge, tiered FIT, Today/Month/Bill/Year totals and plan/rate helpers. Rates can be changed later in Home Assistant without modifying the card source.
+
+## Device configuration
+
+Source definitions live in `config/devices.yaml`. `tools/generate.py` remains in the repository for regenerating the backend when tracked entities are added or changed. The generated device registry is bundled into `utility-cost-card.js`, so HACS only has one frontend asset to install.
+
+## Current Solar Max defaults
+
+- Peak: $0.581713/kWh
+- Shoulder: $0.210584/kWh
+- Off peak: $0.348018/kWh
+- Supply: $1.260600/day
+- FIT tier 1: $0.08/kWh for first 10 kWh/day
+- FIT tier 2: $0.03/kWh thereafter
+
+## Repository layout
+
+```text
+utility-cost-card.js        HACS-installed Lovelace card (single bundled asset)
+hacs.json                   HACS metadata
+packages/utility_cost.yaml  HA accounting backend
+config/                     source configuration
+tools/generate.py           generator
+examples/lovelace.yaml      card example
+```
+
+## Upgrading from v0.5.0
+
+Remove the old custom repository entry if HACS marked it non-compliant, then add the corrected GitHub repository again as category **Dashboard**. Do not add `www/utility-cost-devices.js` as a separate resource; v0.6.0 bundles it into the main card.
