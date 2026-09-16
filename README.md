@@ -1,4 +1,4 @@
-# Utility Cost v1.0.1
+# Utility Cost v1.0.2
 
 A HACS **custom integration** for Home Assistant with an included Lovelace card. It estimates electricity costs from live power sensors, preserves accumulated historical cost when rates change, handles TOU import pricing, daily supply charges and two-tier solar FIT, and tracks selected devices.
 
@@ -33,5 +33,5 @@ This is a bill **estimate** based on Home Assistant sensor data. Device figures 
 Settings → Devices & services → Utility Cost → Configure. Existing accumulated dollar totals remain; new consumption uses the newly saved rates.
 
 
-## v1.0.1 frontend fix
+## v1.0.2 frontend fix
 The bundled Lovelace card is now served at `/utility_cost_static/utility-cost-card.js` and injected into the Home Assistant frontend automatically when the integration loads. No separate Dashboard HACS repository or manual Lovelace resource entry is required. After updating, restart Home Assistant and use `type: custom:utility-cost-card`.

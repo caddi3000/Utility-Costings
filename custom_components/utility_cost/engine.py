@@ -14,12 +14,12 @@ class CostEngine:
     def cfg(self): return {**DEFAULTS, **self.entry.data, **self.entry.options}
     async def load(self):
         self.data=await self.store.async_load() or {"periods":{},"fit_day_kwh":0.0,"fit_day":None,"tariff_history":[]}
-        self.data.setdefault("periods",{}); self.data.setdefault("tariff_history",[])
+        self.data.setdefault("periods",{}); self.data.setdefault("tariff_history",[]); self.data.setdefault("started_at", dt_util.now().isoformat())
         self._ensure_periods(dt_util.now())
     def _keys(self,now):
         bill_start=str(self.cfg[CONF_BILL_START])
         return {"today":now.date().isoformat(),"month":now.strftime("%Y-%m"),"year":str(now.year),"bill":bill_start}
-    def _blank(self): return {"grid":0.0,"supply":0.0,"fit":0.0,"devices":{},"tracked_kwh":0.0,"house_kwh":0.0}
+    def _blank(self): return {"grid":0.0,"supply":0.0,"fit":0.0,"devices":{},"device_kwh":{},"tracked_kwh":0.0,"house_kwh":0.0}
     def _ensure_periods(self,now):
         keys=self._keys(now)
         for p,k in keys.items():
@@ -51,7 +51,7 @@ class CostEngine:
         for p in PERIODS:
             x=self.data["periods"][p]; x["grid"]+=imp*hours*rate; x["supply"]+=float(c[CONF_SUPPLY])*hours/24; x["fit"]+=fit; x["house_kwh"]+=house*hours
             for e,kw in dev.items():
-                x["devices"][e]=x["devices"].get(e,0)+kw*hours*rate; x["tracked_kwh"]+=kw*hours
+                x["devices"][e]=x["devices"].get(e,0)+kw*hours*rate; x.setdefault("device_kwh",{})[e]=x.setdefault("device_kwh",{}).get(e,0)+kw*hours; x["tracked_kwh"]+=kw*hours
         await self.store.async_save(self.data)
         for cb in list(self.listeners): cb()
     def period(self,p): return self.data["periods"].get(p,self._blank())
