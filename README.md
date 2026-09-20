@@ -1,20 +1,18 @@
-# Utility Cost v1.2.4 — unified release
+# Utility Cost v1.3.0
 
-One HACS **Integration** containing the Utility Cost accounting backend and both Lovelace cards. This is the only repository required.
+Unified Home Assistant custom integration and Lovelace cards for electricity bill estimation and per-device costing.
 
-## Included
-- Retailer-style bill estimate: grid import charges + daily supply charge − solar FIT credit.
-- Full daily supply charge posted once per active billing day.
-- Peak / Shoulder / Off-peak accounting.
-- Per-device TOU kWh and tariff-cost breakdown for Today, Week, Month, Bill Period and Year.
-- Editable plan, tariffs, FIT tiers, tariff windows, bill-cycle start, source entities and tracked devices through the integration Configure flow.
-- Config-entry migration for installations created with earlier Utility Cost versions.
-- Both bundled cards: `utility-cost-card` and `utility-bill-card`.
+## v1.3.0
+- Repairs per-device Peak / Shoulder / Off-peak accumulation for all new samples.
+- Older device energy that predates TOU buckets is shown explicitly as **Before TOU tracking** rather than incorrectly appearing as zero-use tariff rows.
+- Adds estimated per-device bill impact using the whole-property net Fronius/grid-meter supply mix at each one-minute interval.
+- Tracks estimated grid-supplied kWh, solar-supplied kWh, grid cost, lost FIT opportunity cost, bill impact, solar supplied %, and estimated solar saving.
+- The attribution is deliberately phase-balanced: it uses the net whole-property import position, not an individual electrical phase.
+- Adds an inline **Rates** editor to the Utility Cost dashboard card for Peak, Shoulder, Off-peak, supply, FIT tiers and FIT threshold. Changes apply to future accumulation; historical costs are not repriced.
+- Keeps the full Home Assistant Configure flow for entities, tariff windows and bill-cycle settings.
+- Both `utility-cost-card` and `utility-bill-card` remain bundled in this one HACS Integration.
 
-## HACS
-Add `caddi3000/Utility-Costings` as an **Integration**. `custom_components/utility_cost` must be directly under the repository root. Do not install a separate Electricity-Bill-Cost dashboard repository for this release.
-
-## Lovelace cards
+## Cards
 ```yaml
 type: custom:utility-cost-card
 ```
@@ -24,18 +22,9 @@ type: custom:utility-bill-card
 default_period: bill
 ```
 
-The integration serves the frontend at:
-- `/utility_cost_static/utility-cost-card.js?v=122`
-- `/utility_cost_static/utility-bill-card.js?v=122`
+If manually registering resources, use:
+- `/utility_cost_static/utility-cost-card.js?v=130`
+- `/utility_cost_static/utility-bill-card.js?v=130`
 
-If your Home Assistant installation does not auto-load them, add both under **Settings → Dashboards → Resources** as JavaScript modules.
-
-## Configuration
-Use **Settings → Devices & services → Integrations → Utility Cost → Configure**. Entity IDs are selected in Home Assistant; they are not hard-coded into the integration.
-
-## Device cost meaning
-Device totals are **tariff costs**. Each tracked device's measured energy is assigned to the Peak, Shoulder or Off-peak rate active during that interval. These figures are kept separate from the retailer bill estimate because whole-house solar metering cannot determine the exact solar/grid source of energy consumed by each individual device.
-
-
-## v1.2.4
-Adds backward-compatible Home Assistant Store migration for persistent Utility Cost accounting data (storage versions 1/2 to 3). Existing aggregate totals are preserved; historical per-device TOU buckets that did not previously exist begin accumulating after upgrade.
+## Important accounting note
+Per-device grid/solar attribution is an accounting estimate based on the whole-house supply mix at each interval. It is appropriate for a net-metered three-phase property, but it is not physical circuit-level tracing. Solar opportunity cost uses the applicable FIT tier estimate at that interval.
