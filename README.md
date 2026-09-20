@@ -1,4 +1,4 @@
-# Utility Cost v1.2.2 — unified release
+# Utility Cost v1.2.3 — unified release
 
 One HACS **Integration** containing the Utility Cost accounting backend and both Lovelace cards. This is the only repository required.
 
@@ -35,3 +35,7 @@ Use **Settings → Devices & services → Integrations → Utility Cost → Conf
 
 ## Device cost meaning
 Device totals are **tariff costs**. Each tracked device's measured energy is assigned to the Peak, Shoulder or Off-peak rate active during that interval. These figures are kept separate from the retailer bill estimate because whole-house solar metering cannot determine the exact solar/grid source of energy consumed by each individual device.
+
+
+## v1.2.3
+Adds backward-compatible Home Assistant Store migration for persistent Utility Cost accounting data (storage versions 1/2 to 3). Existing aggregate totals are preserved; historical per-device TOU buckets that did not previously exist begin accumulating after upgrade.
