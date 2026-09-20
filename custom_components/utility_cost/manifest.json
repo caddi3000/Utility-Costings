@@ -1,7 +1,7 @@
 {
   "domain": "utility_cost",
   "name": "Utility Cost",
-  "version": "1.0.2",
+  "version": "1.2.0",
   "config_flow": true,
   "single_config_entry": true,
   "documentation": "https://github.com/caddi3000/Utility-Costings",

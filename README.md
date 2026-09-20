@@ -1,37 +1,36 @@
-# Utility Cost v1.0.2
+# Utility Cost v1.2.0
 
-A HACS **custom integration** for Home Assistant with an included Lovelace card. It estimates electricity costs from live power sensors, preserves accumulated historical cost when rates change, handles TOU import pricing, daily supply charges and two-tier solar FIT, and tracks selected devices.
+Home Assistant custom integration for electricity bill estimation and per-device time-of-use costing.
 
-## Install with HACS
+## What's new in 1.2.0
+- Correct daily supply charge: one full configured daily charge is posted per active billing day instead of accruing it hourly.
+- Per-device Peak / Shoulder / Off-peak kWh and cost accumulation.
+- Expandable device breakdown in both bundled Lovelace cards.
+- Editable tariff rates, daily supply charge, FIT, tariff time windows, bill-cycle start, system entities and tracked devices through **Settings → Devices & services → Integrations → Utility Cost → Configure**.
+- Weekly, monthly, bill-period and yearly accounting retained.
+- Bill cycle now advances in 3-calendar-month periods from the configured cycle start rather than a fixed 91-day approximation.
 
-1. Put this repository on GitHub with `custom_components/utility_cost` at the repository root.
-2. HACS → Integrations → ⋮ → Custom repositories.
-3. Add the repository URL with category **Integration**.
-4. Download **Utility Cost**, then restart Home Assistant.
-5. Settings → Devices & services → Add Integration → **Utility Cost**.
-6. Confirm the suggested grid/house/solar entities and select the device power entities to track.
-7. Confirm the tariff settings.
+## HACS repository layout
+This repository is an **Integration** repository. `custom_components/utility_cost` must be directly under the repository root.
 
-The included card is served by the integration. If Home Assistant cannot auto-register the resource, add `/utility_cost/utility-cost-card.js` as a JavaScript module in Dashboard Resources.
+## Frontend resources
+The integration serves:
+- `/utility_cost_static/utility-cost-card.js?v=120`
+- `/utility_cost_static/utility-bill-card.js?v=120`
 
-Add a manual card:
+If your HA installation does not auto-load the bundled cards, add those two URLs under **Settings → Dashboards → Resources** as **JavaScript module** resources.
+
+## Cards
 ```yaml
 type: custom:utility-cost-card
 ```
 
-## Current tariff defaults
-- Peak: AUD 0.581713/kWh — 06:00–10:00 and 16:00–00:00
-- Shoulder: AUD 0.210584/kWh — 10:00–16:00
-- Off-peak: AUD 0.348018/kWh — 00:00–06:00
-- Supply: AUD 1.260600/day
-- FIT: AUD 0.08/kWh for first 10 kWh exported/day, then AUD 0.03/kWh
+```yaml
+type: custom:utility-bill-card
+default_period: bill
+```
 
-## Important
-This is a bill **estimate** based on Home Assistant sensor data. Device figures are tariff-equivalent consumption costs; self-consumed solar cannot be assigned to individual appliances without circuit/source-level metering.
+## Cost meaning
+The top bill estimate is retailer-style: grid import charges + supply charge − solar FIT credit.
 
-### Changing plan later
-Settings → Devices & services → Utility Cost → Configure. Existing accumulated dollar totals remain; new consumption uses the newly saved rates.
-
-
-## v1.0.2 frontend fix
-The bundled Lovelace card is now served at `/utility_cost_static/utility-cost-card.js` and injected into the Home Assistant frontend automatically when the integration loads. No separate Dashboard HACS repository or manual Lovelace resource entry is required. After updating, restart Home Assistant and use `type: custom:utility-cost-card`.
+Tracked-device totals are **tariff costs**: each device's measured energy is accumulated against the Peak, Shoulder or Off-peak rate active at that moment. Because whole-home solar data cannot identify which individual appliance consumed each unit of self-generated solar, device tariff cost is intentionally kept separate from the retailer bill estimate.

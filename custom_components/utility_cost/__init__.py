@@ -14,20 +14,24 @@ from .const import DOMAIN, PLATFORMS
 from .engine import CostEngine
 
 _LOGGER = logging.getLogger(__name__)
-CARD_VERSION = "1.0.2"
+CARD_VERSION = "1.2.0"
 CARD_PATH = Path(__file__).parent / "frontend" / "utility-cost-card.js"
+BILL_CARD_PATH = Path(__file__).parent / "frontend" / "utility-bill-card.js"
 CARD_URL = "/utility_cost_static/utility-cost-card.js"
+BILL_CARD_URL = "/utility_cost_static/utility-bill-card.js"
 CARD_MODULE_URL = f"{CARD_URL}?v={CARD_VERSION.replace('.', '')}"
+BILL_CARD_MODULE_URL = f"{BILL_CARD_URL}?v={CARD_VERSION.replace('.', '')}"
 
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up Utility Cost and expose the bundled Lovelace card."""
     await hass.http.async_register_static_paths(
-        [StaticPathConfig(CARD_URL, str(CARD_PATH), False)]
+        [StaticPathConfig(CARD_URL, str(CARD_PATH), False), StaticPathConfig(BILL_CARD_URL, str(BILL_CARD_PATH), False)]
     )
     # Load the bundled card globally. This is intentionally independent of
     # Lovelace storage resources, so it also works with YAML dashboards.
     add_extra_js_url(hass, CARD_MODULE_URL)
+    add_extra_js_url(hass, BILL_CARD_MODULE_URL)
     _LOGGER.info("Utility Cost card registered at %s", CARD_MODULE_URL)
     return True
 

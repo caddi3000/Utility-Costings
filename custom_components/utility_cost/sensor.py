@@ -7,10 +7,10 @@ from .const import DOMAIN
 async def async_setup_entry(hass, entry, async_add_entities):
     eng=hass.data[DOMAIN][entry.entry_id]
     entities=[]
-    for p in ("today","month","bill","year"):
+    for p in ("today","week","month","bill","year"):
         entities += [BillSensor(eng,p,"net"),BillSensor(eng,p,"grid"),BillSensor(eng,p,"supply"),BillSensor(eng,p,"fit")]
     for eid in eng.cfg.get("tracked_power_entities",[]):
-        for p in ("today","month","bill","year"): entities.append(DeviceCostSensor(eng,p,eid))
+        for p in ("today","week","month","bill","year"): entities.append(DeviceCostSensor(eng,p,eid))
     entities += [ActiveTariffSensor(eng), UntrackedPowerSensor(eng)]
     async_add_entities(entities)
 
@@ -30,7 +30,7 @@ class BillSensor(Base):
     @property
     def extra_state_attributes(self):
         x=self.eng.period(self.p)
-        return {"utility_cost_role":self.kind,"period":self.p,"period_key":x.get("key"),"plan":self.eng.cfg.get("plan_name"),"grid_cost":round(x.get("grid",0),4),"supply_cost":round(x.get("supply",0),4),"solar_credit":round(x.get("fit",0),4),"house_kwh":round(x.get("house_kwh",0),3),"tracked_kwh":round(x.get("tracked_kwh",0),3),"data_since":self.eng.data.get("started_at")}
+        return {"utility_cost_role":self.kind,"period":self.p,"period_key":x.get("key"),"plan":self.eng.cfg.get("plan_name"),"grid_cost":round(x.get("grid",0),4),"supply_cost":round(x.get("supply",0),4),"solar_credit":round(x.get("fit",0),4),"house_kwh":round(x.get("house_kwh",0),3),"tracked_kwh":round(x.get("tracked_kwh",0),3),"grid_kwh":round(x.get("grid_kwh",0),3),"export_kwh":round(x.get("export_kwh",0),3),"solar_kwh":round(x.get("solar_kwh",0),3),"tariff_kwh":x.get("tariff_kwh",{}),"tariff_cost":x.get("tariff_cost",{}),"data_since":self.eng.data.get("started_at")}
 
 def _display_name(st,eid):
     name=(st.attributes.get("friendly_name") if st else None) or eid.split(".",1)[-1].replace("_"," ").title()
@@ -48,7 +48,7 @@ class DeviceCostSensor(Base):
     @property
     def extra_state_attributes(self):
         x=self.eng.period(self.p)
-        return {"source_entity":self.eid,"period":self.p,"display_name":self.display_name,"energy_kwh":round(x.get("device_kwh",{}).get(self.eid,0),3),"data_since":self.eng.data.get("started_at")}
+        return {"source_entity":self.eid,"period":self.p,"display_name":self.display_name,"energy_kwh":round(x.get("device_kwh",{}).get(self.eid,0),3),"tariff_kwh":x.get("device_tariff_kwh",{}).get(self.eid,{"peak":0.0,"shoulder":0.0,"offpeak":0.0}),"tariff_cost":x.get("device_tariff_cost",{}).get(self.eid,{"peak":0.0,"shoulder":0.0,"offpeak":0.0}),"cost_type":"tariff_cost","data_since":self.eng.data.get("started_at")}
 
 class ActiveTariffSensor(Base):
     def __init__(self,eng): super().__init__(eng); self._attr_unique_id="utility_cost_active_tariff"; self._attr_name="Active Tariff"
