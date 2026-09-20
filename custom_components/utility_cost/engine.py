@@ -8,55 +8,33 @@ from .const import *
 PERIODS=("today","week","month","bill","year")
 TARIFFS=("peak","shoulder","offpeak")
 
+class UtilityCostStore(Store):
+    """Persistent store with Home Assistant-compatible storage migration."""
+
+    async def _async_migrate_func(
+        self, old_major_version: int, old_minor_version: int, old_data: dict
+    ) -> dict:
+        """Preserve older Utility Cost data while upgrading the store wrapper.
+
+        Field/schema normalization is deliberately handled by CostEngine.load(),
+        where the current tariff/device defaults are available. Home Assistant
+        will re-save the returned data using this store's current version.
+        """
+        if old_major_version > self.version:
+            raise NotImplementedError(
+                f"Cannot migrate Utility Cost storage from future version "
+                f"{old_major_version}.{old_minor_version}"
+            )
+        return dict(old_data or {})
+
+
 class CostEngine:
     def __init__(self,hass:HomeAssistant,entry):
-        self.hass=hass; self.entry=entry; self.store=Store(hass,3,"utility_cost_state", minor_version=1, async_migrate_func=self._async_migrate_storage)
+        self.hass=hass; self.entry=entry; self.store=UtilityCostStore(hass,3,"utility_cost_state", minor_version=1)
         self.data={}; self.last=None; self.listeners=[]
     @property
     def cfg(self): return {**DEFAULTS,**self.entry.data,**self.entry.options}
 
-    async def _async_migrate_storage(self, old_major_version: int, old_minor_version: int, old_data: dict) -> dict:
-        """Migrate persistent accounting data from older releases.
-
-        Storage v1 contained the original period totals. Storage v2 added
-        weekly/TOU totals. Storage v3 adds per-device TOU data. Existing
-        totals are preserved; fields that did not exist previously are
-        initialised and will accumulate from the upgrade onward.
-        """
-        if old_major_version > 3:
-            raise NotImplementedError(
-                f"Cannot migrate Utility Cost storage from future version {old_major_version}.{old_minor_version}"
-            )
-
-        data = dict(old_data or {})
-        data.setdefault("periods", {})
-        data.setdefault("fit_day_kwh", 0.0)
-        data.setdefault("fit_day", None)
-        data.setdefault("started_at", dt_util.now().isoformat())
-        data.setdefault("supply_posted_day", None)
-
-        # Normalise every stored period without discarding historical totals.
-        blank = self._blank()
-        for period_name, raw in list(data["periods"].items()):
-            if not isinstance(raw, dict):
-                data["periods"][period_name] = dict(blank)
-                continue
-            for key, default in blank.items():
-                if key not in raw:
-                    raw[key] = default.copy() if isinstance(default, dict) else default
-
-            # Older releases stored aggregate device cost/kWh but no TOU split.
-            # Preserve those aggregates. New tariff buckets start at zero because
-            # their historical split cannot be reconstructed safely.
-            raw.setdefault("device_tariff_kwh", {})
-            raw.setdefault("device_tariff_cost", {})
-            raw.setdefault("tariff_kwh", {t: 0.0 for t in TARIFFS})
-            raw.setdefault("tariff_cost", {t: 0.0 for t in TARIFFS})
-
-        # Internal schema migration below recalculates supply once, using the
-        # configured daily rate, so an old partial-day supply value is not kept.
-        data["schema_version"] = min(int(data.get("schema_version", 1) or 1), 2)
-        return data
     async def load(self):
         self.data=await self.store.async_load() or {"periods":{},"fit_day_kwh":0.0,"fit_day":None}
         self.data.setdefault("periods",{}); self.data.setdefault("started_at",dt_util.now().isoformat())
