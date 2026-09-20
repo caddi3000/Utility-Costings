@@ -1,8 +1,8 @@
-# Utility Cost v1.2.0
+# Utility Cost v1.2.1
 
 Home Assistant custom integration for electricity bill estimation and per-device time-of-use costing.
 
-## What's new in 1.2.0
+## What's new in 1.2.1
 - Correct daily supply charge: one full configured daily charge is posted per active billing day instead of accruing it hourly.
 - Per-device Peak / Shoulder / Off-peak kWh and cost accumulation.
 - Expandable device breakdown in both bundled Lovelace cards.
@@ -34,3 +34,8 @@ default_period: bill
 The top bill estimate is retailer-style: grid import charges + supply charge − solar FIT credit.
 
 Tracked-device totals are **tariff costs**: each device's measured energy is accumulated against the Peak, Shoulder or Off-peak rate active at that moment. Because whole-home solar data cannot identify which individual appliance consumed each unit of self-generated solar, device tariff cost is intentionally kept separate from the retailer bill estimate.
+
+
+## v1.2.1
+
+Maintenance release for upgrades from earlier Utility Cost versions. Adds the Home Assistant config-entry migration handler required to upgrade existing installations to schema version 2 without deleting and recreating the integration. Existing entity selections, tariffs and options are preserved; newly introduced settings receive defaults only when missing.
