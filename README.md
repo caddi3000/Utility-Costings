@@ -15,8 +15,8 @@ This repository is an **Integration** repository. `custom_components/utility_cos
 
 ## Frontend resources
 The integration serves:
-- `/utility_cost_static/utility-cost-card.js?v=120`
-- `/utility_cost_static/utility-bill-card.js?v=120`
+- `/utility_cost_static/utility-cost-card.js?v=121`
+- `/utility_cost_static/utility-bill-card.js?v=121`
 
 If your HA installation does not auto-load the bundled cards, add those two URLs under **Settings → Dashboards → Resources** as **JavaScript module** resources.
 
