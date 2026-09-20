@@ -9,13 +9,25 @@ POWER_MULTI = selector.EntitySelector(selector.EntitySelectorConfig(domain="sens
 
 def system_schema(defaults=None):
     d = defaults or {}
-    return vol.Schema({
-        vol.Required(CONF_GRID_IMPORT, default=d.get(CONF_GRID_IMPORT, "sensor.solarnet_power_grid_import")): POWER,
-        vol.Required(CONF_GRID_EXPORT, default=d.get(CONF_GRID_EXPORT, "sensor.solarnet_power_grid_export")): POWER,
-        vol.Required(CONF_HOUSE_POWER, default=d.get(CONF_HOUSE_POWER, "sensor.house_power")): POWER,
-        vol.Optional(CONF_SOLAR_POWER, default=d.get(CONF_SOLAR_POWER, "sensor.total_solar_power")): POWER,
-        vol.Optional(CONF_TRACKED, default=d.get(CONF_TRACKED, ["sensor.evcc_delta_ac_max_smart_occp_charge_power","sensor.kitchen_multi_power","sensor.kitchen_zigbee_power","sensor.chest_freezer_plug_power"])): POWER_MULTI,
-    })
+    schema = {}
+    for key, sel in (
+        (CONF_GRID_IMPORT, POWER),
+        (CONF_GRID_EXPORT, POWER),
+        (CONF_HOUSE_POWER, POWER),
+    ):
+        if d.get(key):
+            schema[vol.Required(key, default=d[key])] = sel
+        else:
+            schema[vol.Required(key)] = sel
+    if d.get(CONF_SOLAR_POWER):
+        schema[vol.Optional(CONF_SOLAR_POWER, default=d[CONF_SOLAR_POWER])] = POWER
+    else:
+        schema[vol.Optional(CONF_SOLAR_POWER)] = POWER
+    if d.get(CONF_TRACKED):
+        schema[vol.Optional(CONF_TRACKED, default=d[CONF_TRACKED])] = POWER_MULTI
+    else:
+        schema[vol.Optional(CONF_TRACKED)] = POWER_MULTI
+    return vol.Schema(schema)
 
 def tariff_schema(defaults=None):
     d = {**DEFAULTS, **(defaults or {})}

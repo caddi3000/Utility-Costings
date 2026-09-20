@@ -14,7 +14,7 @@ from .const import DOMAIN, PLATFORMS
 from .engine import CostEngine
 
 _LOGGER = logging.getLogger(__name__)
-CARD_VERSION = "1.2.1"
+CARD_VERSION = "1.2.2"
 CARD_PATH = Path(__file__).parent / "frontend" / "utility-cost-card.js"
 BILL_CARD_PATH = Path(__file__).parent / "frontend" / "utility-bill-card.js"
 CARD_URL = "/utility_cost_static/utility-cost-card.js"
